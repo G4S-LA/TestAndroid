@@ -14,6 +14,7 @@ public class MainActivity extends AppCompatActivity {
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private TextView tvNumber;
     private SharedPreferences sPref;
+    private long number;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,13 +22,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         tvNumber = findViewById(R.id.tv_number);
+        number = 0;
         loadNumber();
-        tvNumber.setOnClickListener(v -> tvNumber.setText("0"));
+        tvNumber.setOnClickListener(v -> number = -1);
         mHandler.post(tikTak);
-    }
-
-    private long viewToLongPlusOne(TextView view){
-        return Long.parseLong(view.getText().toString()) + 1;
     }
 
     private final Runnable tikTak = new Runnable() {
@@ -35,7 +33,8 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             Log.d("...", tvNumber.getText().toString());
             mHandler.postDelayed(this, 1000);
-            tvNumber.setText(String.valueOf(viewToLongPlusOne(tvNumber)));
+            number += 1000;
+            setTvNumber();
         }
     };
 
@@ -43,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
         sPref = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor editor = sPref.edit();
         editor.putLong("Time", System.currentTimeMillis());
-        editor.putString("Number",tvNumber.getText().toString());
+        editor.putLong("Number",number);
         Log.d("...", "Сохранили число " + tvNumber.getText().toString());
         editor.apply();
     }
@@ -51,11 +50,9 @@ public class MainActivity extends AppCompatActivity {
     private void loadNumber(){
         sPref = getPreferences(MODE_PRIVATE);
         long pastTime = sPref.getLong("Time",System.currentTimeMillis());
-        String number = sPref.getString("Number", "0");
-        Log.d("...", "Загрузили число " + number);
-        Log.d("...", "pstTime = " + pastTime);
-        Log.d("...", "currentTime = " + System.currentTimeMillis());
-        tvNumber.setText(String.valueOf( (Long.parseLong(number) + (System.currentTimeMillis()-pastTime)/1000)));
+        number = sPref.getLong("Number", 0);
+        number += System.currentTimeMillis()-pastTime;
+        setTvNumber();
     }
 
     @Override
@@ -75,5 +72,9 @@ public class MainActivity extends AppCompatActivity {
         super.onRestart();
         loadNumber();
         mHandler.post(tikTak);
+    }
+
+    private void setTvNumber(){
+        tvNumber.setText(String.valueOf(number/1000));
     }
 }
