@@ -20,11 +20,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        
         tvNumber = findViewById(R.id.tv_number);
-        number = 0;
+        number = System.currentTimeMillis();
         loadNumber();
-        tvNumber.setOnClickListener(v -> number = -1);
+        tvNumber.setOnClickListener(v -> number = System.currentTimeMillis());
         mHandler.post(tikTak);
     }
 
@@ -33,7 +33,6 @@ public class MainActivity extends AppCompatActivity {
         public void run() {
             Log.d("...", tvNumber.getText().toString());
             mHandler.postDelayed(this, 1000);
-            number += 1000;
             setTvNumber();
         }
     };
@@ -41,17 +40,14 @@ public class MainActivity extends AppCompatActivity {
     private void saveNumber(){
         sPref = getPreferences(MODE_PRIVATE);
         SharedPreferences.Editor editor = sPref.edit();
-        editor.putLong("Time", System.currentTimeMillis());
         editor.putLong("Number",number);
-        Log.d("...", "Сохранили число " + tvNumber.getText().toString());
+        Log.d("...", "Сохранили число " + number);
         editor.apply();
     }
 
     private void loadNumber(){
         sPref = getPreferences(MODE_PRIVATE);
-        long pastTime = sPref.getLong("Time",System.currentTimeMillis());
-        number = sPref.getLong("Number", 0);
-        number += System.currentTimeMillis()-pastTime;
+        number = sPref.getLong("Number", System.currentTimeMillis());
         setTvNumber();
     }
 
@@ -75,6 +71,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setTvNumber(){
-        tvNumber.setText(String.valueOf(number/1000));
+        tvNumber.setText(String.valueOf((System.currentTimeMillis()-number)/1000));
     }
 }
