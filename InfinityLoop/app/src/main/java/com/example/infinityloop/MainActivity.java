@@ -6,71 +6,55 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Log;
 import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
     private final Handler mHandler = new Handler(Looper.getMainLooper());
     private TextView tvNumber;
-    private SharedPreferences sPref;
-    private long number;
+    private long startTime = -1;
+    private long pastTime = 0;
+    private long delay = 0;
+    private boolean b = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
+
         tvNumber = findViewById(R.id.tv_number);
-        number = System.currentTimeMillis();
-        loadNumber();
-        tvNumber.setOnClickListener(v -> number = System.currentTimeMillis());
-        mHandler.post(tikTak);
+        startTime = getPreferences(MODE_PRIVATE).getLong("Number", System.currentTimeMillis());
+        getPreferences(MODE_PRIVATE).edit().putLong("Number", startTime).apply();
+
+        tvNumber.setOnClickListener(v -> {
+            startTime = System.currentTimeMillis();
+            getPreferences(MODE_PRIVATE).edit().putLong("Number", startTime).apply();
+        });
     }
 
     private final Runnable tikTak = new Runnable() {
         @Override
         public void run() {
-            Log.d("...", tvNumber.getText().toString());
-            mHandler.postDelayed(this, 1000);
-            setTvNumber();
+            if (b) {
+                b = false;
+                pastTime = System.currentTimeMillis() - 1000L;
+            }
+            delay = 1000L - (System.currentTimeMillis() - pastTime - delay);
+            mHandler.postDelayed(this, 1000L + delay);
+            tvNumber.setText(String.valueOf((System.currentTimeMillis() - startTime) / 1000));
+            pastTime = System.currentTimeMillis();
         }
     };
-
-    private void saveNumber(){
-        sPref = getPreferences(MODE_PRIVATE);
-        SharedPreferences.Editor editor = sPref.edit();
-        editor.putLong("Number",number);
-        Log.d("...", "Сохранили число " + number);
-        editor.apply();
-    }
-
-    private void loadNumber(){
-        sPref = getPreferences(MODE_PRIVATE);
-        number = sPref.getLong("Number", System.currentTimeMillis());
-        setTvNumber();
-    }
-
-    @Override
-    public boolean deleteSharedPreferences(String name) {
-        return super.deleteSharedPreferences(name);
-    }
 
     @Override
     protected void onStop() {
         super.onStop();
-        saveNumber();
         mHandler.removeCallbacks(tikTak);
     }
 
     @Override
-    protected void onRestart() {
-        super.onRestart();
-        loadNumber();
+    protected void onStart() {
+        super.onStart();
         mHandler.post(tikTak);
-    }
-
-    private void setTvNumber(){
-        tvNumber.setText(String.valueOf((System.currentTimeMillis()-number)/1000));
     }
 }
