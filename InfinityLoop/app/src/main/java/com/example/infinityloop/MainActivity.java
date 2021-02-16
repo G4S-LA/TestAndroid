@@ -40,7 +40,10 @@ public class MainActivity extends AppCompatActivity {
                 pastTime = System.currentTimeMillis() - 1000L;
             }
             delay = 1000L - (System.currentTimeMillis() - pastTime - delay);
-            mHandler.postDelayed(this, 1000L + delay);
+            if(delay < 0)
+                mHandler.postDelayed(this, 1000L + delay*2);
+            else
+                mHandler.postDelayed(this, 1000L + delay);
             tvNumber.setText(String.valueOf((System.currentTimeMillis() - startTime) / 1000));
             pastTime = System.currentTimeMillis();
         }
