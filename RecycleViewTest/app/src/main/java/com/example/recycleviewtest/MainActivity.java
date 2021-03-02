@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.BroadcastReceiver;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.LinearLayout;
@@ -34,6 +35,5 @@ public class MainActivity extends AppCompatActivity {
 
         NumbersAdapter numbersAdapter = new NumbersAdapter(list, this);
         numbersList.setAdapter(numbersAdapter);
-
     }
 }
